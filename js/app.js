@@ -1004,57 +1004,6 @@
     });
   }
 
-  /* ---------- Monetize（廣告 / 移除廣告內購）---------- */
-  function initMonetize() {
-    if (!window.Monetize) return;
-
-    var item = document.getElementById('removeAdsItem');
-    var statusEl = document.getElementById('adFreeStatus');
-    var buyBtn = document.getElementById('btnBuyRemoveAds');
-    var restoreBtn = document.getElementById('btnRestorePurchase');
-
-    // 廣告解鎖尚無後端驗證，暫停販售並保持既有購買可還原。
-    item.style.display = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform() ? '' : 'none';
-
-    function renderAdFree() {
-      var adFree = Monetize.isAdFree();
-      statusEl.style.display = adFree ? '' : 'none';
-      buyBtn.style.display = 'none';
-      restoreBtn.style.display = '';
-    }
-
-    buyBtn.addEventListener('click', async function () {
-      buyBtn.disabled = true;
-      try {
-        var result = await Monetize.buyRemoveAds();
-        if (result && result.message) alert(result.message);
-      } catch (e) {
-        alert('購買失敗：' + (e && e.message ? e.message : e));
-      } finally {
-        buyBtn.disabled = false;
-        renderAdFree();
-      }
-    });
-
-    restoreBtn.addEventListener('click', async function () {
-      restoreBtn.disabled = true;
-      try {
-        var result = await Monetize.restorePurchases();
-        if (result && result.message) alert(result.message);
-      } catch (e) {
-        alert('還原失敗：' + (e && e.message ? e.message : e));
-      } finally {
-        restoreBtn.disabled = false;
-        renderAdFree();
-      }
-    });
-
-    window.addEventListener('idle:adfree-changed', renderAdFree);
-
-    Monetize.init().catch(function (error) { console.warn('[store] initialization failed', error); });
-    renderAdFree();
-  }
-
   /* ---------- 信任資訊 / 成就 ---------- */
   var levelMeta = {
     gold: { label: '金牌', cls: 'gold' },
@@ -2898,7 +2847,6 @@
     initConsent();
     if (window.IdleTutorial) IdleTutorial.init({ openTask: function (id) { return openTaskDetail(id, true); }, openTasks: openTasks });
     initAuthGate();
-    initMonetize();
     initProfileDetail();
     checkAuth();
     window.addEventListener('online', function () {
