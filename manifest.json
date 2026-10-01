@@ -1,0 +1,20 @@
+{
+  "name": "閒人地圖",
+  "short_name": "閒人地圖",
+  "description": "找到附近能幫忙的人，即時人力媒合平台",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#6366f1",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/idle-map-sloth-app-icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "social"],
+  "lang": "zh-TW"
+}

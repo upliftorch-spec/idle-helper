@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<link rel="canonical" href="https://upliftorch.com/tools/idle-helper/">
+<link rel="alternate" hreflang="zh-TW" href="https://upliftorch.com/tools/idle-helper/">
+<title>閒人地圖 — 找到附近能幫忙的人</title>
+<meta name="description" content="閒人地圖，有空的人上線接任務，需要幫忙的人在地圖上找到最近的閒人。即時媒合、快速連結。">
+<meta name="keywords" content="閒人地圖,即時幫忙,任務媒合,打工,零工,接案,地圖找人">
+<link rel="icon" href="favicon.svg">
+<meta property="og:title" content="閒人地圖 — 找到附近能幫忙的人">
+<meta property="og:description" content="有空的人上線接任務，需要幫忙的人在地圖上找到最近的閒人。">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#6366f1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="閒人地圖">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="favicon.svg">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="idle-icon-help" viewBox="0 0 24 24"><path d="M8 13V5a2 2 0 0 1 4 0v6M12 10V4a2 2 0 0 1 4 0v8M16 10V7a2 2 0 0 1 4 0v8a7 7 0 0 1-14 0l-3-4a2 2 0 0 1 3-2l2 3"/></symbol>
+    <symbol id="idle-icon-bag" viewBox="0 0 24 24"><path d="M5 7h14l2 14H3L5 7Z"/><path d="M8 9V6a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="idle-icon-dog" viewBox="0 0 24 24"><path d="m5 4 7 2 7-2 3 7-4 1v6a6 6 0 0 1-12 0v-6l-4-1 3-7Z"/><circle cx="9" cy="13" r=".7"/><circle cx="15" cy="13" r=".7"/><path d="m10 17 2 2 2-2M12 19v2"/></symbol>
+    <symbol id="idle-icon-box" viewBox="0 0 24 24"><path d="m12 2 9 5v10l-9 5-9-5V7l9-5Zm0 10v10M3 7l9 5 9-5M7.5 4.5l9 5"/></symbol>
+    <symbol id="idle-icon-queue" viewBox="0 0 24 24"><circle cx="5" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><path d="M2 14v-3a3 3 0 0 1 6 0v3M9 14v-3a3 3 0 0 1 6 0v3M16 14v-3a3 3 0 0 1 6 0v3M4 14v7m2-7v7m5-7v7m2-7v7m5-7v7m2-7v7"/></symbol>
+    <symbol id="idle-icon-truck" viewBox="0 0 24 24"><path d="M1 4h13v13H1V4Zm13 5h5l3 4v4h-8"/><circle cx="5" cy="18" r="3"/><circle cx="18" cy="18" r="3"/></symbol>
+    <symbol id="idle-icon-wrench" viewBox="0 0 24 24"><path d="M14 6a6 6 0 0 0-7 7l-5 5a3 3 0 0 0 4 4l5-5a6 6 0 0 0 7-7l-4 4-4-4 4-4Z"/></symbol>
+    <symbol id="idle-icon-leaf" viewBox="0 0 24 24"><path d="M20 3C10 2 3 6 3 13a7 7 0 0 0 14 0c0-3 2-6 3-10ZM3 21l11-11"/></symbol>
+    <symbol id="idle-icon-walk" viewBox="0 0 24 24"><circle cx="14" cy="4" r="2"/><path d="m8 11 4-4 4 5h5M12 7l-2 8-5 6m5-6 5 2 2 5M3 9v11"/></symbol>
+    <symbol id="idle-icon-inbox" viewBox="0 0 24 24"><path d="M4 3h16l2 12v6H2v-6L4 3Zm-2 12h6l2 3h4l2-3h6M9 8l3 3 3-3M12 5v6"/></symbol>
+    <symbol id="idle-icon-recycle" viewBox="0 0 24 24"><path d="m8 6 3-4 5 7m-5 0h5V4M18 11l4 6-8 1m3-4-3 4 3 4M11 18H3l3-7m3 3-3-3-4 2"/></symbol>
+    <symbol id="idle-icon-store" viewBox="0 0 24 24"><path d="M4 3h16l2 7H2l2-7ZM3 10v11h18V10M9 21v-7h6v7M2 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 4 4 0 0 0 8 0"/></symbol>
+    <symbol id="idle-icon-luggage" viewBox="0 0 24 24"><rect x="5" y="6" width="14" height="15" rx="2"/><path d="M9 6V2h6v4M9 10v7m6-7v7M8 21v1m8-1v1"/></symbol>
+    <symbol id="idle-icon-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 5h4M11 19h2"/></symbol>
+    <symbol id="idle-icon-camera" viewBox="0 0 24 24"><path d="M3 6h4l2-3h6l2 3h4v15H3V6Z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="idle-icon-meal" viewBox="0 0 24 24"><path d="M3 2v7a3 3 0 0 0 6 0V2M6 2v20M20 22V2c-4 1-6 5-6 10h6"/></symbol>
+    <symbol id="idle-icon-book" viewBox="0 0 24 24"><path d="M12 5v16M2 3c4-1 7 0 10 2 3-2 6-3 10-2v16c-4-1-7 0-10 2-3-2-6-3-10-2V3Z"/></symbol>
+    <symbol id="idle-icon-money" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M5 9h1m12 6h1"/></symbol>
+    <symbol id="idle-icon-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="idle-icon-shield" viewBox="0 0 24 24"><path d="m12 2 8 3v7c0 5-8 10-8 10S4 17 4 12V5l8-3Z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="idle-icon-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="m8 13-1 9 5-3 5 3-1-9"/></symbol>
+    <symbol id="idle-icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L20 5"/></symbol>
+    <symbol id="idle-icon-play" viewBox="0 0 24 24"><path d="m7 3 14 9-14 9V3Z"/></symbol>
+    <symbol id="idle-icon-pause" viewBox="0 0 24 24"><path d="M8 4v16M16 4v16"/></symbol>
+    <symbol id="idle-icon-star" viewBox="0 0 24 24"><path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/></symbol>
+    <symbol id="idle-icon-star-filled" viewBox="0 0 24 24"><path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/></symbol>
+  </defs>
+</svg>
+
+<!-- Auth Gate -->
+<div class="auth-gate" id="authGate">
+  <div class="auth-container">
+    <section class="auth-hero">
+      <h1 class="auth-brand-title">
+        閒人地圖
+      </h1>
+      <div class="auth-visual" aria-hidden="true">
+        <div class="auth-visual-glow"></div>
+        <img src="assets/idle-map-sloth-logo.png" alt="">
+      </div>
+      <div class="auth-copy">
+        <h2 class="auth-title">附近的忙，<br><span>交給剛好有空的人</span></h2>
+        <p class="auth-subtitle">想幫忙、賺點費用，或臨時需要一雙手，打開地圖就能找到彼此。</p>
+      </div>
+      <div class="auth-benefits" aria-label="服務特色">
+        <span><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-check"></use></svg>即時找附近</span>
+        <span><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-check"></use></svg>任務自己選</span>
+        <span><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-check"></use></svg>安全聊再決定</span>
+      </div>
+    </section>
+
+    <div class="auth-login-card">
+      <div class="auth-error" id="loginError" style="display:none"></div>
+      <button class="btn btn-full btn-google" id="btnGoogleLogin">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+        <span class="google-login-label">使用 Google 帳號繼續</span>
+      </button>
+      <button class="btn btn-full btn-apple" id="btnAppleLogin" style="display:none">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.05 12.54c-.03-2.6 2.12-3.85 2.22-3.91-1.21-1.77-3.1-2.01-3.77-2.04-1.6-.16-3.13.94-3.94.94-.81 0-2.07-.92-3.4-.9-1.75.03-3.36 1.02-4.26 2.58-1.82 3.16-.47 7.84 1.3 10.4.86 1.26 1.89 2.66 3.24 2.61 1.3-.05 1.79-.84 3.36-.84 1.57 0 2.01.84 3.39.81 1.4-.03 2.29-1.28 3.15-2.54 1-1.46 1.41-2.87 1.43-2.94-.03-.01-2.74-1.05-2.77-4.18zM14.5 4.81c.72-.87 1.2-2.08 1.07-3.29-1.03.04-2.28.69-3.02 1.56-.66.77-1.24 2-1.09 3.18 1.15.09 2.32-.58 3.04-1.45z"/></svg>
+        透過 Apple 繼續
+      </button>
+    </div>
+
+    <div class="auth-tag-stream" aria-hidden="true">
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-help"></use></svg>有空，我來幫</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-bag"></use></svg>順路幫忙買</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-dog"></use></svg>陪毛孩散步</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-box"></use></svg>幫忙搬一箱</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-queue"></use></svg>代排一下隊</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-truck"></use></svg>附近幫送件</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-wrench"></use></svg>簡單組裝</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-leaf"></use></svg>幫忙澆花</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-walk"></use></svg>陪長輩散步</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-inbox"></use></svg>代領包裹</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-recycle"></use></svg>幫忙丟垃圾</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-store"></use></svg>臨時顧店</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-luggage"></use></svg>協助搬行李</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-phone"></use></svg>教手機操作</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-camera"></use></svg>幫忙拍照</span>
+      <span class="auth-stream-tag"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-meal"></use></svg>代買晚餐</span>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <h1>
+      <img class="header-brand-icon" src="assets/idle-map-sloth-app-icon-1024.png" alt="">
+      閒人地圖 <span class="test-badge">測試中</span>
+    </h1>
+    <div class="header-actions">
+      <button id="btnTheme" aria-label="切換深色模式">
+        <svg id="iconTheme" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<aside class="task-activity" id="taskActivity" aria-label="近期成功接案" hidden>
+  <span class="task-activity-label"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-award"></use></svg> 接案喜訊</span>
+  <div class="task-activity-window">
+    <div class="task-activity-track" id="taskActivityTrack">
+      <span id="taskActivityText" role="status"></span>
+      <span id="taskActivityCopy" aria-hidden="true"></span>
+    </div>
+  </div>
+  <button type="button" id="btnPauseActivity" aria-label="暫停跑馬燈" aria-pressed="false"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-pause"></use></svg></button>
+</aside>
+
+<!-- Map Search Overlay -->
+<div class="map-overlay">
+  <div class="search-row">
+    <div class="search-box-wrap">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" class="search-input" placeholder="搜尋服務或地點...">
+    </div>
+    <button class="btn-locate" id="btnLocate" aria-label="定位">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Radar Scanning Overlay -->
+<div class="radar-overlay" id="radarOverlay">
+  <div class="radar-scan">
+    <div class="radar-beam"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-dot"></div>
+  </div>
+  <p class="radar-text">正在努力幫您確認位置...</p>
+</div>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- Online Status Toggle -->
+<div class="online-toggle" id="onlineToggle">
+  <div class="toggle-inner">
+    <div class="toggle-status">
+      <span class="status-dot offline"></span>
+      <span class="status-text">離線中</span>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="toggleOnline" aria-label="接案通知開關">
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+
+<!-- Help Me Button -->
+<p class="map-location-status" id="mapLocationStatus" role="status" hidden></p>
+<button class="help-me-btn" id="btnHelpMe">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  <span>附近閒人 <strong id="idleCount">0</strong> 位</span>
+</button>
+
+<!-- Help Results Panel -->
+<div class="help-panel" id="helpPanel" style="display:none">
+  <div class="help-panel-header">
+    <h3>可幫忙的人</h3>
+    <button class="help-panel-close" id="btnCloseHelp">&times;</button>
+  </div>
+  <div class="help-panel-filter" id="helpFilterChips">
+    <button class="chip active" data-cat="all">全部</button>
+    <button class="chip" data-cat="errand">跑腿代購</button>
+    <button class="chip" data-cat="move">搬運體力</button>
+    <button class="chip" data-cat="teach">教學輔導</button>
+    <button class="chip" data-cat="repair">維修水電</button>
+    <button class="chip" data-cat="clean">清潔打掃</button>
+    <button class="chip" data-cat="pet">寵物照顧</button>
+  </div>
+  <div class="help-panel-loading" id="helpLoading" style="display:none">
+    <div class="spinner"></div>
+    <p>搜尋附近的閒人...</p>
+  </div>
+  <div class="help-panel-list" id="helpList"></div>
+</div>
+
+<!-- 閒人詳情頁 -->
+<div class="detail-panel" id="profileDetailPanel" style="display:none">
+  <div class="detail-panel-header">
+    <button class="detail-back" id="btnCloseDetail" aria-label="返回">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <h3>閒人資料</h3>
+  </div>
+  <div class="detail-panel-body" id="detailBody"></div>
+  <div class="detail-panel-footer">
+    <button class="btn btn-full" id="btnDetailContact">聯繫</button>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <button class="nav-item active" data-tab="map">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+    <span>地圖</span>
+  </button>
+  <button class="nav-item" data-tab="tasks">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <span>任務</span>
+  </button>
+  <button class="nav-item publish-btn" data-tab="publish">
+    <div class="publish-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <span>發需求</span>
+  </button>
+  <button class="nav-item" data-tab="chat">
+    <div style="position:relative">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span class="chat-badge" id="chatBadge" style="display:none"></span>
+    </div>
+    <span>聊天</span>
+  </button>
+  <button class="nav-item" data-tab="profile">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>我的</span>
+  </button>
+</nav>
+
+<!-- Tab Pages (hidden by default, shown when tab is active) -->
+<!-- Task List Page -->
+<div class="tab-page" id="pageTasks" style="display:none">
+  <div class="page-inner">
+    <div class="tutorial-banner" id="tutorialTaskBanner" hidden></div>
+    <button type="button" class="tutorial-reminder" id="btnDeferredTutorial" hidden><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-book"></use></svg> 有空再看教學</button>
+    <h2>任務</h2>
+    <div class="task-role-tabs" role="tablist" aria-label="任務身分">
+      <button type="button" id="taskPublisherTab" role="tab" data-task-role="publisher" aria-controls="taskPublisherPanel" aria-selected="false" tabindex="-1"><strong>發布</strong><span>我找人幫忙</span></button>
+      <button type="button" id="taskHelperTab" role="tab" data-task-role="helper" aria-controls="taskHelperPanel" aria-selected="true"><strong>接案</strong><span>我幫忙賺錢</span></button>
+    </div>
+    <section id="taskPublisherPanel" class="task-role-panel" role="tabpanel" aria-labelledby="taskPublisherTab" hidden>
+      <h3>我的發布</h3>
+      <p class="task-role-summary" id="publishedTaskSummary" role="status">在這裡查看報價、選擇接案者與追蹤進度。</p>
+      <button type="button" class="btn btn-full" id="btnTaskPublish">發布新任務</button>
+      <div class="task-phase-filters" aria-label="發布任務分類">
+        <button type="button" class="chip active" data-published-filter="open" aria-pressed="true">招募中</button>
+        <button type="button" class="chip" data-published-filter="active" aria-pressed="false">進行中</button>
+        <button type="button" class="chip" data-published-filter="history" aria-pressed="false">紀錄</button>
+      </div>
+      <label class="task-history-filter" id="publishedHistoryFilter" hidden>紀錄篩選
+        <select id="publishedHistoryStatus"><option value="all">全部紀錄</option><option value="completed">已完成</option><option value="cancelled">已取消</option></select>
+      </label>
+      <div id="myPublishedTasks" class="task-list"><p class="hint">登入後可查看</p></div>
+    </section>
+    <section id="taskHelperPanel" class="task-role-panel" role="tabpanel" aria-labelledby="taskHelperTab">
+      <h3>我的接案</h3>
+      <p class="task-role-summary" id="helperTaskSummary" role="status">先提出報價，對方接受後才算接案。</p>
+      <div class="task-phase-filters" aria-label="接案任務分類">
+        <button type="button" class="chip active" data-helper-filter="find" aria-pressed="true">找任務</button>
+        <button type="button" class="chip" data-helper-filter="pending" aria-pressed="false">等回覆</button>
+        <button type="button" class="chip" data-helper-filter="active" aria-pressed="false">進行中</button>
+        <button type="button" class="chip" data-helper-filter="history" aria-pressed="false">紀錄</button>
+      </div>
+    <div id="taskDiscovery">
+    <h4 class="section-title">附近任務</h4>
+    <div class="task-filters" id="taskFilters">
+      <button class="chip active" data-filter="all">全部</button>
+      <button class="chip" data-filter="instant">即時</button>
+      <button class="chip" data-filter="scheduled">預約</button>
+    </div>
+    <div class="task-list" id="taskList">
+      <div class="empty-state" style="margin-top:2rem">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <p>附近還沒有任務</p>
+        <p class="hint">可先加入服務，開啟接案通知，等附近出現需求。</p>
+      </div>
+    </div>
+
+    </div>
+    <div id="myAssignedTasks" class="task-list" hidden><p class="hint">登入後可查看</p></div>
+    <div id="myRespondedTasks" class="task-list" hidden><p class="hint">登入後可查看等待回覆的報價</p></div>
+    <div id="taskHelperHistory" hidden>
+      <label class="task-history-filter">紀錄篩選
+        <select id="helperHistoryStatus"><option value="all">全部紀錄</option><option value="completed">已完成</option><option value="cancelled">已取消</option><option value="rejected">未被選中</option><option value="withdrawn">已撤回</option></select>
+      </label>
+      <div id="helperTaskHistory" class="task-list"></div>
+    </div>
+    </section>
+  </div>
+</div>
+
+<!-- Publish Task Page -->
+<div class="tab-page" id="pagePublish" style="display:none">
+  <div class="page-inner">
+    <div class="tutorial-banner" id="tutorialPublishBanner" hidden></div>
+    <h2>發布任務</h2>
+    <div class="safety-card">
+      <strong>安全提醒</strong>
+      <p>請只約公開場所，不要要求協助者進入陌生車內、住處、旅館房間或封閉空間。請勿要求交出手機、證件、金融帳號或預付款。</p>
+    </div>
+    <form class="publish-form" id="publishForm">
+      <div class="form-group">
+        <label class="form-label">任務類別</label>
+        <div class="form-chips" id="publishCategoryChips">
+          <button type="button" class="chip active" data-cat="errand">跑腿代購</button>
+          <button type="button" class="chip" data-cat="move">搬運體力</button>
+          <button type="button" class="chip" data-cat="teach">教學輔導</button>
+          <button type="button" class="chip" data-cat="repair">維修水電</button>
+          <button type="button" class="chip" data-cat="clean">清潔打掃</button>
+          <button type="button" class="chip" data-cat="pet">寵物照顧</button>
+          <button type="button" class="chip" data-cat="other">其他</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="taskTitle">任務標題</label>
+        <input type="text" class="form-input" id="taskTitle" placeholder="例如：幫我到全聯買東西" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="taskDesc">任務說明</label>
+        <textarea class="form-input form-textarea" id="taskDesc" placeholder="描述你需要什麼幫忙..." rows="3"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex:1">
+          <label class="form-label" for="taskBudget">預算 (NT$)</label>
+          <input type="number" class="form-input" id="taskBudget" placeholder="500" min="0">
+        </div>
+        <div class="form-group" style="flex:1">
+          <label class="form-label" for="taskType">任務類型</label>
+          <select class="form-input" id="taskType">
+            <option value="instant">即時 — 現在就要</option>
+            <option value="scheduled">預約 — 指定時間</option>
+          </select>
+        </div>
+      </div>
+      <p class="form-hint">參考行情：跑腿代購 100–300、排隊等候 200–500、家務清潔 300–800、搬運／專業服務 800 以上（皆可議）</p>
+
+      <div class="form-group" id="publishBoostOptions" hidden>
+        <label class="form-label">加速找到人（選填）</label>
+        <label class="feature-check"><input type="checkbox" id="boostUrgent" disabled> 急件推播：每日可免費使用 1 次，通知附近符合類別的閒人</label>
+        <label class="feature-check"><input type="checkbox" id="boostExpanded" disabled> 擴大範圍：權益驗證完成後開放</label>
+        <label class="feature-check"><input type="checkbox" id="boostPinned" disabled> 置頂任務：權益驗證完成後開放</label>
+      </div>
+
+      <div class="form-group" id="scheduledGroup" style="display:none">
+        <label class="form-label" for="taskSchedule">預約時間</label>
+        <input type="datetime-local" class="form-input" id="taskSchedule">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="taskAddress">地址（選填）</label>
+        <input type="text" class="form-input" id="taskAddress" placeholder="台中市西區...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">任務地點</label>
+        <p class="form-hint" id="publishLocationHint">目前僅開放台中市；將使用你目前的位置</p>
+      </div>
+
+      <div class="safety-alert" id="publishRiskWarning" style="display:none"></div>
+      <label class="feature-check safety-check"><input type="checkbox" id="publishSafetyConsent" required> 我確認此任務不要求對方進入封閉空間、不交出手機/證件/帳號，也不要求先付款。</label>
+      <button type="submit" class="btn btn-full btn-publish" id="btnPublishTask">發布任務</button>
+    </form>
+
+    <div class="publish-success" id="publishSuccess" style="display:none">
+      <div class="empty-state">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <p style="font-weight:600;font-size:1.1rem;color:var(--text)">任務已發布！</p>
+        <p class="hint">到「任務 → 發布 → 招募中」查看報價並選擇接案者。</p>
+        <button type="button" class="btn" id="btnViewPublished" style="margin-top:1rem">查看我發布的任務</button>
+        <button class="btn" id="btnPublishAnother" style="margin-top:1rem">再發一個</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chat Page -->
+<div class="tab-page" id="pageChat" style="display:none">
+  <!-- Conversation List View -->
+  <div class="page-inner" id="chatListView">
+    <h2>聊天</h2>
+    <div id="conversationList">
+      <div class="empty-state" style="margin-top:2rem">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <p>還沒有聊天</p>
+        <p class="hint">在地圖上點擊閒人的「聯繫」按鈕開始聊天</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat Room View -->
+  <div id="chatRoomView" style="display:none">
+    <div class="chat-header">
+      <button class="chat-back" id="btnChatBack">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="chat-header-name" id="chatPartnerName">對方</div>
+      <button class="chat-report-btn" id="btnChatReport" title="檢舉或封鎖" aria-label="檢舉或封鎖這位使用者">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 21V4"/><path d="M5 5h11.5l-1.8 3 1.8 3H5"/><path d="M10.75 7.1v1.7" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <span>檢舉</span>
+      </button>
+    </div>
+    <div class="safety-alert chat-safety" id="chatSafetyWarning">
+      請把任務溝通留在閒人地圖內。若對方要求改用私人通訊、改到偏僻地點、先匯款、提供敏感資料、上陌生車或關閉手機，請立即取消並回報。
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="tutorial-context" data-tutorial-hint="chat" hidden><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-book"></use></svg> 先確認要做什麼、時間、公開交接地點與約定報酬。聊天不會自動接受報價；請到任務頁查看接案狀態。<button type="button" data-dismiss-tutorial="chat">知道了</button></div>
+    <div class="chat-input-bar">
+      <input type="text" class="chat-input" id="chatInput" placeholder="輸入訊息...">
+      <button class="chat-send" id="btnChatSend">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="tab-page" id="pageProfile" style="display:none">
+  <div class="page-inner">
+    <h2>我的</h2>
+    <div class="profile-card">
+      <div class="avatar-placeholder" id="profileAvatar" role="button" tabindex="0" aria-label="上傳或更換大頭貼">
+        <svg id="profileAvatarIcon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <img id="profileAvatarImg" alt="大頭照" style="display:none">
+        <span class="avatar-edit-badge" id="avatarEditBadge" style="display:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </span>
+      </div>
+      <div class="profile-info">
+        <p class="profile-name">尚未登入</p>
+        <p class="profile-hint">登入後即可使用完整功能</p>
+      </div>
+      <button class="profile-edit-btn" id="btnEditProfile" style="display:none" aria-label="編輯暱稱">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+      </button>
+    </div>
+    <button class="btn btn-outline btn-full profile-avatar-upload" id="btnUploadAvatar" style="display:none">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <span id="avatarUploadLabel">上傳大頭貼</span>
+    </button>
+    <div class="profile-edit-form" id="profileEditForm" style="display:none">
+      <div class="form-group">
+        <label class="form-label" for="editDisplayName">顯示名稱</label>
+        <input type="text" class="form-input" id="editDisplayName" maxlength="20" placeholder="輸入顯示名稱">
+      </div>
+      <div style="display:flex;gap:.5rem">
+        <button class="btn" id="btnSaveProfile" style="flex:1">儲存</button>
+        <button class="btn btn-outline" id="btnCancelProfile" style="flex:1">取消</button>
+      </div>
+    </div>
+    <input type="file" id="avatarFileInput" accept="image/jpeg,image/png,image/webp" style="display:none">
+    <button class="btn btn-full" id="btnProfileAuth" style="margin-top:1rem">登入 / 註冊</button>
+    <button type="button" class="tutorial-entry" id="btnTutorial"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-book"></use></svg> 使用教學 <span>接案／找人幫忙，隨時重看 →</span></button>
+    <!-- 我的服務 -->
+    <div class="accordion-item">
+      <a class="menu-item" id="btnMyServices" href="#">
+        <span>我的服務</span>
+        <svg class="accordion-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <div class="accordion-body" id="myServicesSection" style="display:none">
+        <div class="tutorial-banner" id="tutorialServiceBanner" hidden></div>
+        <div class="safety-card compact">
+          <strong>選擇你願意幫忙的任務</strong>
+          <p>先從相對安全的任務庫勾選項目。上線並分享位置後，附近有人發布相符需求時，系統才會偵測並通知你。</p>
+        </div>
+        <div class="task-library-box service-picker">
+          <div class="service-picker-heading">
+            <strong>快搜或新增服務</strong>
+            <span>搜尋任務庫，也能直接自訂</span>
+          </div>
+          <div class="search-box-wrap compact-search">
+            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" class="search-input" id="taskLibrarySearch" placeholder="快搜：代買、遛狗、搬小箱子...">
+          </div>
+          <p class="form-hint">先顯示常用推薦，輸入關鍵字可搜尋更多任務。</p>
+          <div class="task-library-list" id="taskLibraryList"></div>
+          <div class="service-picker-actions">
+            <button class="btn" id="btnAddSelectedTasks">加入選取任務</button>
+            <button class="btn btn-outline" id="btnAddService">＋ 自訂服務</button>
+          </div>
+          <div id="serviceForm" class="service-custom-form" style="display:none">
+            <div class="service-custom-heading">
+              <strong id="serviceFormTitle">自訂新的服務</strong>
+              <span id="serviceFormHint">儲存後也會加入任務庫，之後快搜就找得到。</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">服務類別</label>
+              <div class="form-chips" id="svcCategoryChips">
+                <button type="button" class="chip active" data-cat="errand">跑腿代購</button>
+                <button type="button" class="chip" data-cat="move">搬運體力</button>
+                <button type="button" class="chip" data-cat="teach">教學輔導</button>
+                <button type="button" class="chip" data-cat="repair">維修水電</button>
+                <button type="button" class="chip" data-cat="clean">清潔打掃</button>
+                <button type="button" class="chip" data-cat="pet">寵物照顧</button>
+                <button type="button" class="chip" data-cat="other">其他</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="svcTitle">服務名稱</label>
+              <input type="text" class="form-input" id="svcTitle" placeholder="例如：跑腿代購、排隊">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="svcDesc">服務說明</label>
+              <textarea class="form-input form-textarea" id="svcDesc" placeholder="描述你能提供的服務..." rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="svcPrice">每小時價格 (NT$)</label>
+              <input type="number" class="form-input" id="svcPrice" placeholder="0" min="0" value="0">
+            </div>
+            <div style="display:flex;gap:.5rem;margin-top:.5rem">
+              <button class="btn" id="btnSaveService" style="flex:1">儲存</button>
+              <button class="btn btn-outline" id="btnCancelService" style="flex:1">取消</button>
+            </div>
+          </div>
+        </div>
+        <div class="my-services-heading">我已加入的服務</div>
+        <div id="myServiceList"></div>
+      </div>
+    </div>
+
+    <!-- 任務紀錄 -->
+    <div class="accordion-item">
+      <a class="menu-item" id="btnMyTaskRecords" href="#">
+        <span>任務紀錄</span>
+        <svg class="accordion-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <div class="accordion-body" id="taskRecordsSection" style="display:none">
+        <p class="hint">選擇身分，前往同一份任務紀錄。</p>
+        <button type="button" class="btn btn-full" id="btnRecordPublished">發布紀錄 · 我找人幫忙</button>
+        <button type="button" class="btn btn-outline btn-full" id="btnRecordAssigned">接案紀錄 · 我幫忙賺錢</button>
+      </div>
+    </div>
+
+    <!-- 評價紀錄 -->
+    <div class="accordion-item">
+      <a class="menu-item" id="btnMyReviews" href="#">
+        <span>評價紀錄</span>
+        <svg class="accordion-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <div class="accordion-body" id="reviewSection" style="display:none">
+        <div id="myReviewList"></div>
+      </div>
+    </div>
+
+    <!-- 成就 -->
+    <div class="accordion-item">
+      <a class="menu-item" id="btnMyAchievements" href="#">
+        <span>成就</span>
+        <svg class="accordion-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <div class="accordion-body" id="achievementSection" style="display:none"></div>
+    </div>
+
+    
+    <div class="accordion-item" id="removeAdsItem" style="display:none">
+      <a class="menu-item" href="#">
+        <span>還原既有購買</span>
+        <svg class="accordion-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <div class="accordion-body" id="removeAdsSection" style="display:none">
+        <p class="hint" style="color:var(--text2);padding:.5rem;font-size:.8rem">目前聯繫與接案免費，不提供新購買或廣告解鎖。曾購買的使用者仍可還原紀錄。</p>
+        <p class="hint" id="adFreeStatus" style="display:none;text-align:center;color:var(--accent);padding:.5rem;font-weight:600"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-check"></use></svg> 已購買，已移除廣告</p>
+        <button class="btn btn-full" id="btnBuyRemoveAds" style="margin-top:.5rem">移除廣告</button>
+        <button class="btn btn-full btn-outline" id="btnRestorePurchase" style="margin-top:.5rem">還原購買</button>
+      </div>
+    </div>
+
+    <!-- 設定 -->
+    <div class="accordion-item">
+      <a class="menu-item" id="btnSettings" href="#">
+        <span>設定</span>
+        <svg class="accordion-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      <div class="accordion-body" id="settingsSection" style="display:none">
+        <div class="availability-panel" id="availabilityPanel">
+          <label for="availableHours">要離線後持續接案多久</label>
+          <select id="availableHours" aria-describedby="availabilityHint">
+            <option value="0" selected>永久（手動關閉才停止）</option>
+            <option value="1">1 小時</option><option value="4">4 小時</option><option value="8">8 小時</option>
+          </select>
+          <div class="tutorial-banner" id="tutorialLocationBanner" hidden></div>
+          <p id="availabilityHint" role="status">預設永久接案，開啟後直到手動關閉才停止。離開 App 仍以最後分享的位置配對，不會在背景持續定位。</p>
+          <button type="button" class="btn btn-outline btn-full availability-stop" id="btnStopAvailability" hidden>關閉接案通知</button>
+          <p id="pushPermissionHint" role="status"></p>
+          <button type="button" class="btn btn-outline btn-full" id="btnEnablePush">開啟訊息通知</button>
+        </div>
+        <button class="btn btn-full" id="btnDeleteAccount" style="background:var(--danger);margin-top:.5rem">刪除閒人地圖資料</button>
+        <p class="hint" style="text-align:center;color:var(--text2);padding:.5rem;font-size:.7rem">刪除後無法復原，所有服務、任務、聊天、評價紀錄將永久移除</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal-overlay" id="reportModal" style="display:none">
+  <div class="modal-card">
+    <h3>檢舉使用者</h3>
+    <div class="form-group">
+      <label class="form-label">檢舉原因</label>
+      <select class="form-input" id="reportReason">
+        <option value="harassment">騷擾或威脅</option>
+        <option value="fraud">詐騙或欺詐</option>
+        <option value="fake">虛假資訊</option>
+        <option value="spam">垃圾訊息</option>
+        <option value="other">其他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="reportDesc">補充說明（選填）</label>
+      <textarea class="form-input form-textarea" id="reportDesc" placeholder="描述發生了什麼..." rows="3"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="btnSubmitReport" style="flex:1;background:var(--danger)">送出檢舉</button>
+      <button class="btn" id="btnBlockUser" style="flex:1;background:var(--accent)">封鎖此人</button>
+    </div>
+    <button class="btn btn-outline btn-full" id="btnCancelReport" style="margin-top:.5rem">取消</button>
+  </div>
+</div>
+
+<!-- Consent Modal (首次使用) -->
+<div class="tutorial-overlay" id="tutorialModal" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle" hidden>
+  <section class="tutorial-card" tabindex="-1">
+    <img class="tutorial-sloth" src="assets/idle-map-sloth-app-icon-1024.png" alt="樹懶小幫手">
+    <p class="tutorial-eyebrow" id="tutorialEyebrow">樹懶陪你，慢慢上手</p>
+    <h2><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-book"></use></svg> <span id="tutorialTitle"></span></h2>
+    <p class="tutorial-description" id="tutorialDescription"></p>
+    <div id="tutorialBody"></div>
+    <div class="tutorial-actions" id="tutorialActions"></div>
+    <p class="tutorial-error" id="tutorialError" role="alert" hidden></p>
+    <button type="button" class="tutorial-skip" id="btnSkipTutorial">稍後再看</button>
+  </section>
+</div>
+<div class="modal-overlay" id="consentModal" style="display:none">
+  <div class="modal-card" style="max-width:440px">
+    <h3>歡迎使用閒人地圖</h3>
+    <p class="modal-hint">在開始之前，請閱讀並同意以下條款：</p>
+    <div class="consent-box">
+      <div class="consent-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <div>
+          <strong>服務性質</strong>
+          <p>本平台為社區互助資訊公告平台，僅提供資訊交流功能，非就業媒合服務。使用者間之服務由雙方自行約定。</p>
+        </div>
+      </div>
+      <div class="consent-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <div>
+          <strong>位置資訊</strong>
+          <p>位置用於搜尋附近服務。接案時長預設永久，也可選擇 1、4 或 8 小時；開啟接案通知後，離開 App 仍會以最後分享的位置配對任務，不會在背景持續追蹤。永久模式直到手動關閉才停止；限時模式到期即停止。</p>
+        </div>
+      </div>
+      <div class="consent-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <div>
+          <strong>免責聲明</strong>
+          <p>本平台不對透過平台聯繫後所進行之服務品質、安全或結果負責。請自行評估風險。</p>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:.75rem;color:var(--text2);margin-top:.75rem">
+      完整內容請參閱 <a href="https://upliftorch.com/tools/idle-helper/terms.html" target="_blank">使用者條款</a> 及 <a href="https://upliftorch.com/tools/idle-helper/privacy.html" target="_blank">隱私權政策</a>
+    </p>
+    <button class="btn btn-full" id="btnAcceptConsent" style="margin-top:.75rem">我已閱讀並同意</button>
+  </div>
+</div>
+
+<!-- Respond Modal -->
+<div class="modal-overlay" id="taskDetailModal" role="dialog" aria-modal="true" aria-labelledby="taskDetailHeading" style="display:none">
+  <div class="modal-card task-detail-card">
+    <div class="task-detail-heading"><h3 id="taskDetailHeading">任務詳情</h3><button type="button" class="btn btn-outline" id="btnCloseTaskDetail">關閉</button></div>
+    <div id="taskDetailContent" aria-live="polite"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="respondModal" style="display:none">
+  <div class="modal-card">
+    <h3>提出報價</h3>
+    <div class="tutorial-context" data-tutorial-hint="quote" hidden><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-book"></use></svg> 送出報價後可在「任務 → 接案 → 等回覆」查看；對方接受後，才會出現在「進行中」。先聊天確認公開交接地點。<button type="button" data-dismiss-tutorial="quote">知道了</button></div>
+    <p class="modal-hint" id="respondTaskTitle"></p>
+    <div class="safety-card compact">
+      <strong>接任務前請確認</strong>
+      <p>公開地點、清楚任務內容、不先付款、不交證件、不上陌生車。感到不安全可以直接取消並回報。</p>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="respondQuote">我的報價（NT$）</label>
+      <input type="number" class="form-input" id="respondQuote" min="0" placeholder="例如：300">
+      <p class="form-hint" id="respondBudgetHint">預設帶入發起者預算，你可以再調整。</p>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="respondMessage">留言給發起者</label>
+      <textarea class="form-input form-textarea" id="respondMessage" rows="3" placeholder="例如：我 20 分鐘後可以到，能幫你處理。"></textarea>
+    </div>
+    <label class="feature-check safety-check"><input type="checkbox" id="respondSafetyConsent"> 我了解安全原則，若對方要求離開平台、先付款、交證件或進入封閉空間，我會取消並回報。</label>
+    <div class="modal-actions">
+      <button class="btn" id="btnSubmitResponse" style="flex:1">送出報價</button>
+      <button class="btn btn-outline" id="btnCancelResponse" style="flex:1">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- Review Modal -->
+<div class="modal-overlay" id="reviewModal" style="display:none">
+  <div class="modal-card">
+    <h3>評價</h3>
+    <div class="tutorial-context" data-tutorial-hint="review" hidden><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-book"></use></svg> 任務完成後才能評價合作對象。請依實際合作經驗填寫，不要放入電話、地址或其他個人資料。<button type="button" data-dismiss-tutorial="review">知道了</button></div>
+    <p class="modal-hint" id="reviewTarget"></p>
+    <div class="star-rating" id="starRating">
+      <button type="button" class="star" data-star="1" aria-label="1 顆星"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-star"></use></svg></button>
+      <button type="button" class="star" data-star="2" aria-label="2 顆星"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-star"></use></svg></button>
+      <button type="button" class="star" data-star="3" aria-label="3 顆星"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-star"></use></svg></button>
+      <button type="button" class="star" data-star="4" aria-label="4 顆星"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-star"></use></svg></button>
+      <button type="button" class="star" data-star="5" aria-label="5 顆星"><svg class="ui-icon" aria-hidden="true"><use href="#idle-icon-star"></use></svg></button>
+    </div>
+    <textarea class="form-input form-textarea" id="reviewComment" placeholder="留下評語（選填）" rows="3"></textarea>
+    <div class="modal-actions">
+      <button class="btn" id="btnSubmitReview" style="flex:1">送出評價</button>
+      <button class="btn btn-outline" id="btnCancelReview" style="flex:1">取消</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/service-area.js"></script>
+<script src="js/api.js"></script>
+<script src="js/monetize.js"></script>
+<script src="js/onboarding.js"></script>
+<script src="config.js"></script>
+<script src="js/app.js"></script>
+<script>document.querySelectorAll(".current-year").forEach(function (el) { el.textContent = new Date().getFullYear(); });</script>
+
+<footer class="open-source-attribution" style="padding:24px;text-align:center"><a href="https://upliftorch.com/">Upliftorch</a> · <a href="https://upliftorch.com/tools/idle-helper/">Official demo / 線上工具</a></footer>
+</body>
+</html>
